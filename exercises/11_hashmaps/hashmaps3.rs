@@ -5,11 +5,10 @@
 // You have to build a scores table containing the name of the team, the total
 // number of goals the team scored, and the total number of goals the team
 // conceded.
-
 use std::collections::HashMap;
 
 // A structure to store the goal details of a team.
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct TeamScores {
     goals_scored: u8,
     goals_conceded: u8,
@@ -31,6 +30,19 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
         // Keep in mind that goals scored by team 1 will be the number of goals
         // conceded by team 2. Similarly, goals scored by team 2 will be the
         // number of goals conceded by team 1.
+        let team_score_default = TeamScores {
+            goals_scored: 0,
+            goals_conceded: 0,
+        };
+        let t1 = scores.entry(team_1_name).or_insert(team_score_default);
+        (t1).goals_scored += team_1_score;
+        (t1).goals_conceded += team_2_score;
+        let t2 = scores.entry(team_2_name).or_insert(TeamScores {
+            goals_scored: 0,
+            goals_conceded: 0,
+        });
+        (t2).goals_scored += team_2_score;
+        (t2).goals_conceded += team_1_score;
     }
 
     scores
@@ -53,7 +65,7 @@ England,Spain,1,0";
     #[test]
     fn build_scores() {
         let scores = build_scores_table(RESULTS);
-
+        
         assert!(["England", "France", "Germany", "Italy", "Poland", "Spain"]
             .into_iter()
             .all(|team_name| scores.contains_key(team_name)));
